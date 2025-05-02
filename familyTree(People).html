@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Apple Revenue Flow (Mobile Optimized)</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      overflow-x: hidden;
+      background: #f8f9fa;
+    }
+    #chart-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      overflow-x: auto;
+    }
+    #replay-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 8px 14px;
+      font-size: 14px;
+      background-color: #00A34C;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+    #replay-btn:hover {
+      background-color: #00873c;
+    }
+    .node rect {
+      fill-opacity: 0.9;
+      transition: fill 0.3s, stroke 0.3s;
+    }
+    .link {
+      fill: none;
+      stroke-opacity: 0.4;
+    }
+    .node-label {
+      font-size: 12px;
+      font-weight: bold;
+      fill: #333;
+      pointer-events: none;
+      text-transform: capitalize;
+    }
+
+    /* 📱 Mobile-specific adjustments */
+    @media (max-width: 768px) {
+      .node-label {
+        font-size: 10px;
+      }
+      #replay-btn {
+        top: 10px;
+        right: 10px;
+        padding: 6px 10px;
+        font-size: 12px;
+      }
+      #chart-container {
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="chart-container">
+    <button id="replay-btn">Replay Flow</button>
+    <svg id="sankey"></svg>
+  </div>
+
+  <script>
+    async function loadData() {
+  return {
+    nodes: [
+      { name: "Rollins", color: "#696969"},
+      { name: "Matilda", color: "#696969"},
+      { name: "Pacharo", color: "#696969"},
+      { name: "Tereza", color: "#696969"},
+      { name: "Mervis", color: "#696969"},
+      { name: "Sophie", color: "#696969"},
+      { name: "Lizzie", color: "#696969"},
+      { name: "Ipyana", color: "#696969"},
+      { name: "Lusungu", color: "#696969"},
+      { name: "Sean", color: "#696969"},
+      { name: "Jacque", color: "#696969"},
+      { name: "Max", color: "#696969"},
+      { name: "Danford", color: "#696969"},
+      { name: "Haywood", color: "#696969"},
+      { name: "DSS 2015", color: "#696969" },
+      { name: "DSS 2019", color: "#696969" },
+      { name: "RPM 2019", color: "#696969" },
+      { name: "WB 2019", color: "#696969" },
+      { name: "BDS 2019", color: "#696969" },
+      { name: "RPM 2022", color: "#00A34C" },
+      { name: "BDS 2022", color: "#00A34C" },
+      { name: "DD 2024", color: "#cc0000" },
+      { name: "RPM 2024", color: "#cc0000" },
+      { name: "MK 2024", color: "#cc0000" },
+      { name: "BDS 2024", color: "#cc0000" }
+    ],
+    links: [
+      { source: "Rollins", target: "DSS 2015", value: 1, color: "#BBBBBB" },
+      { source: "Matilda", target: "DSS 2019", value: 1, color: "#BBBBBB" },
+      { source: "DSS 2015", target: "DSS 2019", value: 1, color: "#BBBBBB" },
+      { source: "Tereza", target: "RPM 2019", value: 1, color: "#BBBBBB" },
+      { source: "Pacharo", target: "RPM 2019", value: 1, color: "#BBBBBB" },  
+      { source: "DSS 2015", target: "RPM 2019", value: 0, color: "#BBBBBB" },
+      { source: "Mervis", target: "WB 2019", value: 1, color: "#BBBBBB" },
+      { source: "DSS 2015", target: "WB 2019", value: 0, color: "#BBBBBB" },
+      { source: "Sophie", target: "BDS 2019", value: 1, color: "#BBBBBB" },
+      { source: "DSS 2015", target: "BDS 2019", value: 0, color: "#BBBBBB" },
+
+      
+      { source: "RPM 2019", target: "RPM 2022", value: 2, color: "#8CD5AE" },
+      { source: "DSS 2019", target: "RPM 2022", value: 0, color: "#8CD5AE" },
+      { source: "Lizzie", target: "RPM 2022", value: 1, color: "#BBBBBB" },
+      { source: "Ipyana", target: "RPM 2022", value: 1, color: "#BBBBBB" },
+      { source: "WB 2019", target: "RPM 2022", value: 1, color: "#8CD5AE" },
+      { source: "BDS 2019", target: "BDS 2022", value: 1, color: "#8CD5AE" },
+
+      { source: "RPM 2022", target: "DD 2024", value: 1, color: "#ff9999" },
+      { source: "Lusungu", target: "DD 2024", value: 1, color: "#ff9999" },
+      { source: "Danford", target: "DD 2024", value: 1, color: "#ff9999" },
+      { source: "RPM 2022", target: "RPM 2024", value: 2, color: "#ff9999" },
+      { source: "Sean", target: "RPM 2024", value: 1, color: "#ff9999" },
+      { source: "Jacque", target: "RPM 2024", value: 1, color: "#ff9999" },
+      { source: "Haywood", target: "RPM 2024", value: 1, color: "#ff9999" },
+
+      { source: "BDS 2022", target: "MK 2024", value: 0, color: "#ff9999" },
+      { source: "Sophie", target: "MK 2024", value: 1, color: "#ff9999" },
+      { source: "Max", target: "MK 2024", value: 1, color: "#ff9999" },
+      { source: "BDS 2022", target: "BDS 2024", value: 1, color: "#ff9999" }
+    ]
+  };
+}
+
+
+    function initChart() {
+      const container = document.getElementById('chart-container');
+      const width = container.clientWidth;
+      const height = Math.min(window.innerHeight * 0.8, 800);
+
+      const svg = d3.select('#sankey')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('viewBox', [0, 0, width, height])
+        .attr('preserveAspectRatio', 'xMidYMid meet')
+        .style('width', '100%')
+        .style('height', 'auto');
+
+      return { svg, width, height };
+    }
+
+    async function renderSankey() {
+      const { svg, width, height } = initChart();
+      const data = await loadData();
+
+      const sankeyNodes = data.nodes.map(d => ({ ...d }));
+      const sankeyLinks = data.links.map(d => ({
+        source: sankeyNodes.find(n => n.name === d.source),
+        target: sankeyNodes.find(n => n.name === d.target),
+        value: d.value,
+        color: d.color
+      }));
+
+      const sankey = d3.sankey()
+        .nodeWidth(15)
+        .nodePadding(width < 600 ? 20 : 40)
+        .extent([[20, 20], [width - 20, height - 20]]);
+
+      const { nodes, links } = sankey({
+        nodes: sankeyNodes,
+        links: sankeyLinks
+      });
+
+      svg.selectAll("*").remove();
+
+      const allLinkTargets = new Set(links.map(l => l.target.name));
+      const allLinkSources = new Set(links.map(l => l.source.name));
+      const initialNodeNames = [...allLinkSources].filter(n => !allLinkTargets.has(n));
+
+      const nodeGroup = svg.append("g")
+        .attr("class", "nodes")
+        .selectAll("g")
+        .data(nodes)
+        .join("g")
+        .style("opacity", d => initialNodeNames.includes(d.name) ? 1 : 0);
+
+      nodeGroup.append("rect")
+        .attr("x", d => d.x0)
+        .attr("y", d => d.y0)
+        .attr("height", d => d.y1 - d.y0)
+        .attr("width", d => d.x1 - d.x0)
+        .attr("fill", d => d.color || "#ccc")
+        .attr("stroke", "#000");
+
+      nodeGroup.append("text")
+        .attr("class", "node-label")
+        .attr("x", d => d.x0 < width / 2 ? d.x1 + 6 : d.x0 - 6)
+        .attr("y", d => (d.y1 + d.y0) / 2)
+        .attr("dy", "0.35em")
+        .attr("text-anchor", d => d.x0 < width / 2 ? "start" : "end")
+        .text(d => `${d.name} - ${d.value} Employees`)
+        .style("opacity", d => initialNodeNames.includes(d.name) ? 1 : 0)
+        .transition()
+        .duration(500)
+        .delay((d, i) => i * 150 + 500)
+        .style("opacity", 1);
+
+      const linkGroup = svg.append("g").attr("class", "links");
+
+      const delayPerLink = 1000;
+
+      for (let i = 0; i < links.length; i++) {
+        const d = links[i];
+        const path = d3.sankeyLinkHorizontal()(d);
+
+        const link = linkGroup.append("path")
+          .attr("d", path)
+          .attr("fill", "none")
+          .attr("stroke", d.color || "#999")
+          .attr("stroke-width", Math.max(1, d.width))
+          .attr("stroke-dasharray", function () {
+            const length = this.getTotalLength();
+            return `${length} ${length}`;
+          })
+          .attr("stroke-dashoffset", function () {
+            return this.getTotalLength();
+          })
+          .style("opacity", 0.8);
+
+        await new Promise(resolve => {
+          setTimeout(() => {
+            link
+              .transition()
+              .duration(delayPerLink)
+              .attr("stroke-dashoffset", 0)
+              .on("end", () => {
+                svg.selectAll(".nodes g")
+                  .filter(n => n.name === d.target.name)
+                  .transition()
+                  .duration(300)
+                  .style("opacity", 1);
+                resolve();
+              });
+          }, 0);
+        });
+      }
+
+      svg.selectAll(".nodes g")
+        .filter(d => !links.find(l => l.target.name === d.name))
+        .transition()
+        .duration(500)
+        .style("opacity", 1);
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      try {
+        if (!window.d3 || !d3.sankey) throw new Error('D3 or Sankey not loaded!');
+        await renderSankey();
+      } catch (error) {
+        console.error('Failed to render Sankey:', error);
+        document.getElementById('chart-container').innerHTML = `
+          <div style="color: red; padding: 20px;">
+            <h3>⚠️ Chart Failed to Load</h3>
+            <p>${error.message}</p>
+          </div>
+        `;
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      renderSankey();
+    });
+
+    document.getElementById('replay-btn').addEventListener('click', () => {
+      renderSankey();
+    });
+  </script>
+</body>
+</html>
